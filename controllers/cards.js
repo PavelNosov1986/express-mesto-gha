@@ -20,29 +20,24 @@ const createCard = (req, res, next) => {
     .then((card) => res.status(OK_CODE).send({ data: card }))
     .catch((err) => {
       if (err instanceof mongoose.Error.ValidationError) {
-        next(new IncorrectError(`${INCORRECT_ERROR_MESSAGE} при создании карточки.`));
+        return next(new IncorrectError(`${INCORRECT_ERROR_MESSAGE} при создании карточки.`));
       }
       return next(err);
     });
 };
 
 const deleteCard = (req, res, next) => {
-  Card.findByIdAndRemove(req.params.cardId)
+  const { id } = req.params;
+  Card.findById(id)
+    .orFail(() => new NotFoundError(NOT_FOUND_CARD_MESSAGE))
     .then((card) => {
-      if (card === null) {
-        throw new NotFoundError(NOT_FOUND_CARD_MESSAGE);
+      if (!card.owner.equals(req.user._id)) {
+        return next(new ForbiddenError('Нельзя удалить чужую карточку'));
       }
-      if (card.owner.toString() !== req.user._id) {
-        throw new ForbiddenError('Доступ запрещен');
-      }
-      return res.send({ data: card });
+      return card.remove()
+        .then(() => res.send({ message: 'Карточка удалена' }));
     })
-    .catch((err) => {
-      if (err instanceof mongoose.Error.CastError) {
-        next(new IncorrectError(`${INCORRECT_ERROR_MESSAGE} карточки.`));
-      }
-      return next(err);
-    });
+    .catch(next);
 };
 
 const modifyLike = (req, res, next, action) => {
