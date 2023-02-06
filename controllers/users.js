@@ -48,40 +48,66 @@ const login = (req, res, next) => {
     .catch(next);
 };
 
+// const createUser = (req, res, next) => {
+//   const { name, about, avatar, email, password } = req.body;
+//   return User.findOne({ email })
+//     .then((user) => {
+//       if (user !== null) {
+//         throw new ConflictError('Пользователь с таким email уже зарегистрирован');
+//       }
+//     })
+//     .then(() => {
+//       bcrypt
+//         .hash(password, 10)
+//         .then((hash) => {
+//           User.create({
+//             name,
+//             about,
+//             avatar,
+//             email,
+//             password: hash,
+//           });
+//         })
+//         .then(() => {
+//           res.status(OK_CODE).send({ name, about, avatar, email });
+//         })
+//         .catch((err) => {
+//           if (err instanceof mongoose.Error.ValidationError) {
+//             next(new IncorrectError(`${INCORRECT_ERROR_MESSAGE} при создании пользователя.`));
+//           }
+//           if (err.code === 11000) {
+//             next();
+//           }
+//           next(err);
+//         });
+//     })
+//     .catch(next);
+// };
+
 const createUser = (req, res, next) => {
   const { name, about, avatar, email, password } = req.body;
-  return User.findOne({ email })
-    .then((user) => {
-      if (user !== null) {
-        throw new ConflictError('Пользователь с таким email уже зарегистрирован');
-      }
+  bcrypt.hash(password, 10)
+    .then((hash) => {
+      User.create({
+        name,
+        about,
+        avatar,
+        email,
+        password: hash,
+      });
     })
     .then(() => {
-      bcrypt
-        .hash(password, 10)
-        .then((hash) => {
-          User.create({
-            name,
-            about,
-            avatar,
-            email,
-            password: hash,
-          });
-        })
-        .then(() => {
-          res.status(OK_CODE).send({ name, about, avatar, email });
-        })
-        .catch((err) => {
-          if (err instanceof mongoose.Error.ValidationError) {
-            next(new IncorrectError(`${INCORRECT_ERROR_MESSAGE} при создании пользователя.`));
-          }
-          if (err.code === 11000) {
-            next();
-          }
-          next(err);
-        });
+      res.status(OK_CODE).send({ name, about, avatar, email });
     })
-    .catch(next);
+    .catch((err) => {
+      if (err.code === 11000) {
+        next(new ConflictError('Пользователь с таким email уже зарегистрирован'));
+      } else if (err.name === 'ValidationError') {
+        next(new IncorrectError(`${Object.values(err.errors).map((error) => error.massege).join(', ')}`));
+      } else {
+        next(err);
+      }
+    });
 };
 
 const getUser = (req, res, next) => {

@@ -26,24 +26,6 @@ const createCard = (req, res, next) => {
     });
 };
 
-// const deleteCard = (req, res, next) => {
-//   Card.findByIdAndRemove(req.params.cardId)
-//     .then((card) => {
-//       if (card === null) {
-//         throw new NotFoundError(NOT_FOUND_CARD_MESSAGE);
-//       }
-//       if (card.owner.toString() !== req.user._id) {
-//         throw new ForbiddenError('Доступ запрещен');
-//       }
-//       return res.send({ data: card });
-//     })
-//     .catch((err) => {
-//       if (err instanceof mongoose.Error.CastError) {
-//         next(new IncorrectError(`${INCORRECT_ERROR_MESSAGE} карточки.`));
-//       }
-//       return next(err);
-//     });
-// };
 const deleteCard = (req, res, next) => {
   const { cardId } = req.params;
   Card.findById(cardId)
@@ -69,7 +51,7 @@ const modifyLike = (req, res, next, action) => {
     })
     .catch((err) => {
       if (err instanceof mongoose.Error.CastError) {
-        next(new IncorrectError(`${INCORRECT_ERROR_MESSAGE} для лайка.`));
+        return next(new IncorrectError(`${INCORRECT_ERROR_MESSAGE} для лайка.`));
       }
       return next(err);
     });
