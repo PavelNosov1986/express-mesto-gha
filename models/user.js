@@ -1,3 +1,4 @@
+/* eslint-disable no-useless-escape */
 const mongoose = require('mongoose');
 
 const userSchema = new mongoose.Schema({
