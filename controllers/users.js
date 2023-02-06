@@ -62,11 +62,9 @@ const createUser = (req, res, next) => {
       if (err.code === 11000) {
         return next(new ConflictError('Пользователь с таким email уже зарегистрирован'));
       }
-
       if (err.name === 'ValidationError') {
         return next(new IncorrectError(`${INCORRECT_ERROR_MESSAGE} при создании пользователя.`));
       }
-
       return next(err);
     });
 };
@@ -103,7 +101,7 @@ const getUserById = (req, res, next) => {
     })
     .catch((err) => {
       if (err instanceof mongoose.Error.CastError) {
-        next(new IncorrectError(`${INCORRECT_ERROR_MESSAGE} пользователя.`));
+        return next(new IncorrectError(`${INCORRECT_ERROR_MESSAGE} пользователя.`));
       }
       return next(err);
     });
@@ -124,7 +122,7 @@ const updateUser = (req, res, next, info) => {
     })
     .catch((err) => {
       if (err instanceof mongoose.Error.ValidationError) {
-        next(new IncorrectError(`${INCORRECT_ERROR_MESSAGE} при обновлении информации.`));
+        return next(new IncorrectError(`${INCORRECT_ERROR_MESSAGE} при обновлении информации.`));
       }
       return next(err);
     });

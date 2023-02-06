@@ -1,3 +1,4 @@
+/* eslint-disable no-useless-escape */
 const mongoose = require('mongoose');
 
 const cardSchema = new mongoose.Schema({
@@ -12,7 +13,7 @@ const cardSchema = new mongoose.Schema({
     required: true,
     validate: {
       validator: (v) => {
-        /^(https?:\/\/)(www.)?[^\s]+(#?)$/i.test(v);
+        /^(http|https):\/\/([\w_-]+(?:(?:\.[\w_-]+)+))([\w.,@?^=%&:\/~+#-]*[\w@?^=%&\/~+#-])/i.test(v);
       },
       message: 'Некорректный формат ссылки',
     },
