@@ -96,8 +96,8 @@ const createUser = (req, res, next) => {
         password: hash,
       });
     })
-    .then(() => {
-      res.status(OK_CODE).send({ name, about, avatar, email });
+    .then((data) => {
+      res.status(OK_CODE).send(data);
     })
     .catch((err) => {
       if (err.code === 11000) {
