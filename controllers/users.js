@@ -96,14 +96,14 @@ const createUser = (req, res, next) => {
         password: hash,
       });
     })
-    .then((data) => {
-      res.status(OK_CODE).send(data);
+    .then(() => {
+      res.status(OK_CODE).send({ name, about, avatar, email });
     })
     .catch((err) => {
       if (err.code === 11000) {
         next(new ConflictError('Пользователь с таким email уже зарегистрирован'));
-      } else if (err.name === 'ValidationError') {
-        next(new IncorrectError(`${Object.values(err.errors).map((error) => error.massege).join(', ')}`));
+      } else if (err instanceof mongoose.Error.ValidationError) {
+        next(new IncorrectError(`${INCORRECT_ERROR_MESSAGE} при создании пользователя.`));
       } else {
         next(err);
       }
